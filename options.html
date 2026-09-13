@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4PDA Tracker — темы</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <div>
+        <h1>Темы и история</h1>
+        <p>Здесь хранятся темы, посты и сборки.</p>
+      </div>
+      <button id="refresh">Обновить</button>
+    </div>
+
+    <p id="status" role="status"></p>
+    <section>
+      <h2>Темы</h2>
+      <div id="topics"></div>
+    </section>
+
+    <section>
+      <h2>Сборки</h2>
+      <div id="batches"></div>
+    </section>
+  </main>
+
+  <script src="common.js"></script>
+  <script src="markdown.js"></script>
+  <script src="render-utils.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

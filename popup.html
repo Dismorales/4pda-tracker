@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4PDA Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="popup">
+  <main>
+    <h1>4PDA Tracker</h1>
+    <p id="status">Готов.</p>
+
+    <button id="collectCurrent">Собрать новое</button>
+    <button id="addCurrent">Добавить текущую тему</button>
+    <button id="openOptions" class="secondary">Темы и история</button>
+
+    <div id="summary" class="card" hidden></div>
+
+    <div id="actions" hidden>
+      <button id="copy">Скопировать последнюю сборку</button>
+      <button id="download">Скачать .md</button>
+    </div>
+  </main>
+  <script src="common.js"></script>
+  <script src="markdown.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

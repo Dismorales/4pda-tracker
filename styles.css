@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f6f6f6;
+  color: #222;
+}
+.popup {
+  min-width: 360px;
+}
+main {
+  padding: 14px;
+}
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+h1 { margin: 0 0 8px; font-size: 20px; }
+h2 { margin-top: 28px; }
+p { line-height: 1.45; }
+button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+}
+button:hover { background: #eee; }
+button:disabled { opacity: .55; cursor: wait; }
+button.secondary { background: #fafafa; }
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+.toolbar button { width: auto; }
+.topic-row, .batch-row {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.row-actions button {
+  width: auto;
+}
+.muted { color: #666; font-size: 13px; }
+.ok { color: #176b2f; }
+.error { color: #9b1c1c; }
+code { background: #eee; padding: 1px 4px; border-radius: 4px; }

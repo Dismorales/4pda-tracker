@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "4PDA Tracker",
+  "version": "0.3.10",
+  "description": "РЎРѕР±РёСЂР°РµС‚ РЅРѕРІС‹Рµ РїРѕСЃС‚С‹ РёР· РІС‹Р±СЂР°РЅРЅС‹С… С‚РµРј 4PDA, С…СЂР°РЅРёС‚ РёСЃС‚РѕСЂРёСЋ Рё С„РѕСЂРјРёСЂСѓРµС‚ Markdown.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://4pda.to/*",
+    "https://4pda.ru/*"
+  ],
+  "action": {
+    "default_title": "4PDA Tracker",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "minimum_chrome_version": "110",
+  "background": {
+    "service_worker": "background.js"
+  }
+}
