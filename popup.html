@@ -11,11 +11,14 @@
     <h1>4PDA Tracker</h1>
     <p id="status">Готов.</p>
 
-    <button id="collectCurrent">Собрать новое</button>
-    <button id="addCurrent">Добавить текущую тему</button>
+    <button id="checkAll" data-job>Проверить новое</button>
+    <button id="collectAll" data-job>Собрать всё</button>
+    <button id="collectCurrent" data-job class="secondary">Собрать текущую тему</button>
+    <button id="addCurrent" data-job>Добавить текущую тему</button>
     <button id="openOptions" class="secondary">Темы и история</button>
 
     <div id="summary" class="card" hidden></div>
+    <div id="topicResults" class="card" hidden></div>
 
     <div id="actions" hidden>
       <button id="copy">Скопировать последнюю сборку</button>

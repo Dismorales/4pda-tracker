@@ -3,29 +3,32 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Editors
+# Редакторы
 .vscode/
 .idea/
 *.code-workspace
 *.swp
 *~
 
-# Python test environment and caches
+# Python: виртуальные окружения и кэш
 .venv/
 venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Browser and test artifacts
+# Артефакты браузера и тестов
 test-results/
 playwright-report/
 chrome-profile/
 test-profile/
 
-# Temporary files and logs
+# Временные файлы и логи
 *.log
 *.tmp
 *.temp
 *.bak
 *.orig
+
+# Резервные копии
+4pda-tracker-backup-*.json

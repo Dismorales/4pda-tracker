@@ -50,6 +50,16 @@
     assert(container.querySelectorAll('[data-batch-id="one"]').length === 1, 'first batch duplicated');
     assert(container.querySelectorAll('[data-batch-id="two"]').length === 1, 'second batch duplicated');
   });
+  await test('Topic ordering keeps legacy fallback and honors saved order', () => {
+    const legacy = [
+      {topicId: '2', title: 'Яндекс'},
+      {topicId: '1', title: 'Альфа'}
+    ];
+    assert(sortTopics(legacy).map(topic => topic.topicId).join() === '1,2', 'legacy order is unstable');
+    const ordered = legacy.map((topic, sortOrder) => ({...topic, sortOrder}));
+    assert(sortTopics(ordered).map(topic => topic.topicId).join() === '2,1', 'saved order ignored');
+    assert(nextTopicSortOrder(legacy) === 0 && nextTopicSortOrder(ordered) === 2, 'new topic order is not last');
+  });
   await test('Relative/absolute dates, explicit ISO and authors', () => {
     const page = parse(post('145041218', 'Сегодня, 13:31', 'Текст') +
       post('145041224', 'Вчера, 22:15', 'Текст') +
@@ -322,6 +332,66 @@
     failed = false;
     try { await commitCollection(topic, {...next, lastPostId: '99'}, [], null); } catch { failed = true; }
     assert(failed && (await dbGet('topics', 'test')).lastPostId === '16', 'stale run overwrote marker');
+  });
+  await test('Backup validates, replaces all stores and rolls back failed writes', async () => {
+    await dbPut('topics', {topicId: 'ordered', url: `${topicUrl}&backup=1`, lastPostId: '30',
+      lastCheckedPostId: '31', sortOrder: 4, custom: 'kept'});
+    await dbPut('posts', {postId: '30', topicId: 'ordered', text: 'complete record', custom: 7});
+    await dbPut('batches', {batchId: 'reviewed', topicId: 'ordered', createdAt: '2026-09-13T10:00:00Z',
+      postIds: ['30'], reviewed: true, custom: {kept: true}});
+    const exported = await createBackup();
+    assert(exported.format === BACKUP_FORMAT && exported.backupVersion === BACKUP_VERSION, 'backup signature');
+    assert(Array.isArray(exported.data.topics) && Array.isArray(exported.data.posts) && Array.isArray(exported.data.batches), 'stores missing');
+    assert(exported.data.topics.find(topic => topic.topicId === 'ordered').lastCheckedPostId === '31', 'topic fields lost');
+    assert(exported.data.batches.find(batch => batch.batchId === 'reviewed').reviewed === true, 'batch fields lost');
+    assert(!('job' in exported) && !('status' in exported), 'temporary status exported');
+
+    const state = async () => JSON.stringify({
+      topics: await dbGetAll('topics'), posts: await dbGetAll('posts'), batches: await dbGetAll('batches')
+    });
+    const unchanged = await state();
+    const invalidBackups = [
+      '{broken',
+      {...exported, format: 'some-json'},
+      {...exported, backupVersion: 999},
+      {...exported, data: {...exported.data, topics: [{title: 'missing keys'}]}}
+    ];
+    for (const candidate of invalidBackups) {
+      let failed = false;
+      try { await restoreBackup(typeof candidate === 'string' ? JSON.parse(candidate) : candidate); } catch { failed = true; }
+      assert(failed && await state() === unchanged, 'invalid backup changed data');
+    }
+
+    const replacement = {
+      format: BACKUP_FORMAT,
+      backupVersion: BACKUP_VERSION,
+      exportedAt: '2026-09-13T12:00:00.000Z',
+      data: {
+        topics: [
+          {topicId: 'legacy', url: `${topicUrl}&legacy=1`, lastPostId: '40'},
+          {topicId: 'restored', url: `${topicUrl}&restored=1`, lastPostId: '50', lastCheckedPostId: '51', sortOrder: 0}
+        ],
+        posts: [{postId: '50', topicId: 'restored', text: 'restored'}],
+        batches: [
+          {batchId: 'legacy-batch', topicId: 'legacy', createdAt: '2026-09-12T10:00:00Z', postIds: []},
+          {batchId: 'restored-batch', topicId: 'restored', createdAt: '2026-09-13T10:00:00Z', postIds: ['50'], reviewed: true}
+        ]
+      }
+    };
+    await restoreBackup(replacement);
+    assert((await dbGetAll('topics')).length === 2 && !(await dbGet('topics', 'test')), 'restore merged topics');
+    assert((await dbGetAll('posts')).length === 1 && !(await dbGet('posts', '30')), 'restore merged posts');
+    assert((await dbGetAll('batches')).length === 2 && !(await dbGet('batches', 'reviewed')), 'restore merged batches');
+    assert(!('sortOrder' in await dbGet('topics', 'legacy')) && !('reviewed' in await dbGet('batches', 'legacy-batch')), 'legacy fields invented');
+    assert((await dbGet('topics', 'restored')).lastCheckedPostId === '51' && (await dbGet('batches', 'restored-batch')).reviewed, 'state not restored');
+
+    const beforeWriteFailure = await state();
+    const poisonedPost = {postId: 'poisoned', topicId: 'restored'};
+    Object.defineProperty(poisonedPost, 'text', {enumerable: true, get() { throw new Error('write failure'); }});
+    const poisoned = {...replacement, data: {...replacement.data, posts: [poisonedPost]}};
+    let writeFailed = false;
+    try { await restoreBackup(poisoned); } catch { writeFailed = true; }
+    assert(writeFailed && await state() === beforeWriteFailure, 'failed write left partial restore');
   });
   await test('Markdown reads new datetimeText and legacy datetime', () => {
     const md = buildMarkdown({createdAt: '2026-09-12T12:00:00Z'}, {topicId: '1', url: topicUrl}, [

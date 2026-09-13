@@ -8,15 +8,21 @@
 </head>
 <body>
   <main class="page">
-    <div class="toolbar">
-      <div>
-        <h1>Темы и история</h1>
-        <p>Здесь хранятся темы, посты и сборки.</p>
-      </div>
-      <button id="refresh">Обновить</button>
-    </div>
+    <h1>Темы и история</h1>
+    <p>Здесь хранятся темы, посты и сборки.</p>
 
     <p id="status" role="status"></p>
+    <section>
+      <h2>Резервная копия</h2>
+      <p>Сохраните локальные темы, посты и сборки в JSON или восстановите их из ранее сохранённого файла.</p>
+      <div class="row-actions">
+        <button id="exportBackup">Скачать резервную копию</button>
+        <button id="importBackup">Восстановить из файла</button>
+      </div>
+      <input id="backupFile" type="file" accept="application/json,.json" hidden>
+      <p id="backupStatus" role="status"></p>
+    </section>
+
     <section>
       <h2>Темы</h2>
       <div id="topics"></div>

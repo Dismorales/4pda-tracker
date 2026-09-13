@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "4PDA Tracker",
-  "version": "0.3.10",
+  "version": "0.4.0",
   "description": "РЎРѕР±РёСЂР°РµС‚ РЅРѕРІС‹Рµ РїРѕСЃС‚С‹ РёР· РІС‹Р±СЂР°РЅРЅС‹С… С‚РµРј 4PDA, С…СЂР°РЅРёС‚ РёСЃС‚РѕСЂРёСЋ Рё С„РѕСЂРјРёСЂСѓРµС‚ Markdown.",
   "permissions": [
     "activeTab",
