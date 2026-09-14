@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 
 root = Path(__file__).resolve().parents[1]
 topic_url = "https://4pda.to/forum/index.php?showtopic=1109483"
-pages = {0: ["10", "11"], 2: ["12", "10", "13"]}
+pages = {0: ["10", "11"], 2: ["10", "12", "13"]}
 topic_pages = {
     "1109483": pages,
     "200": {0: ["2000"]},
@@ -126,8 +126,8 @@ with tempfile.TemporaryDirectory(prefix="4pda-extension-test-", ignore_cleanup_e
     assert worker.evaluate("dbGetAll('batches').then(b => b.length)") == 0
     print("PASS MV3 successful check refreshes title without marker or history changes")
 
-    pages[4] = ["14", "10", "15"]
-    pages[6] = ["16", "17", "10"]
+    pages[4] = ["10", "14", "15"]
+    pages[6] = ["10", "16", "17"]
     fail_page[0] = ("1109483", 4)
     start("check")
     assert completed()["state"] == "error"
@@ -186,7 +186,7 @@ with tempfile.TemporaryDirectory(prefix="4pda-extension-test-", ignore_cleanup_e
     print("PASS MV3 repeat and reset preserve history without duplicate batches")
 
     # Count-only workflow: 8, then 6 more, then no change.
-    pages[8] = ["18", "19", "20", "21", "22", "23", "24", "25", "10"]
+    pages[8] = ["10", "18", "19", "20", "21", "22", "23", "24", "25"]
     before_posts = worker.evaluate("dbGetAll('posts').then(rows => rows.length)")
     before_batches = worker.evaluate("dbGetAll('batches').then(rows => rows.length)")
     start("checkAll")
@@ -212,7 +212,7 @@ with tempfile.TemporaryDirectory(prefix="4pda-extension-test-", ignore_cleanup_e
     assert '8 (+8)' in popup.locator('#topicResults').inner_text()
     popup.close()
 
-    pages[8] = ["18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "10"]
+    pages[8] = ["10", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"]
     start("checkAll")
     second = next(item for item in completed()["results"] if item["topicId"] == "1109483")
     assert (second["totalUncollected"], second["sinceLastCheck"]) == (14, 6), second
@@ -224,14 +224,14 @@ with tempfile.TemporaryDirectory(prefix="4pda-extension-test-", ignore_cleanup_e
 
     # Legacy topic without lastCheckedPostId uses lastPostId, then an interrupted
     # check and collection leave their respective markers unchanged.
-    topic_pages["999"] = {0: ["100", "101"], 2: ["102", "100"]}
+    topic_pages["999"] = {0: ["100", "101"], 2: ["100", "102"]}
     forum_titles["999"] = "Legacy topic"
     worker.evaluate("dbPut('topics', {topicId: '999', title: 'Legacy topic', url: 'https://4pda.to/forum/index.php?showtopic=999', lastPostId: '101', firstPostId: '100', addedAt: new Date().toISOString()})")
     start("checkAll")
     legacy = next(item for item in completed()["results"] if item["topicId"] == "999")
     assert (legacy["totalUncollected"], legacy["sinceLastCheck"]) == (1, 1), legacy
     assert worker.evaluate("dbGet('topics', '999').then(t => t.lastCheckedPostId)") == "102"
-    topic_pages["999"][4] = ["103", "100"]
+    topic_pages["999"][4] = ["100", "103"]
     fail_page[0] = ("999", 4)
     start("checkAll")
     failed_check = completed()

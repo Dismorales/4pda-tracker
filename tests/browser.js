@@ -280,10 +280,10 @@
   const pages = {
     0: {offset: 0, offsets: [0, 35, 105], previousOffset: null, topicTitle: 'Fixture', posts: [{postId: '10'}, {postId: '11'}]},
     35: {offset: 35, offsets: [0, 35, 70, 105], previousOffset: 0, posts: [{postId: '10'}, {postId: '12'}, {postId: '13'}]},
-    70: {offset: 70, offsets: [0, 35, 70, 105], previousOffset: 35, posts: [{postId: '14'}, {postId: '10'}, {postId: '15'}]},
-    105: {offset: 105, offsets: [0, 70, 105], previousOffset: 70, posts: [{postId: '16'}, {postId: '15'}, {postId: '10'}]}
+    70: {offset: 70, offsets: [0, 35, 70, 105], previousOffset: 35, posts: [{postId: '10'}, {postId: '14'}, {postId: '15'}]},
+    105: {offset: 105, offsets: [0, 70, 105], previousOffset: 70, posts: [{postId: '10'}, {postId: '16'}, {postId: '15'}]}
   };
-  await test('Baseline starts at latest without importing; header position irrelevant', async () => {
+  await test('Baseline starts at latest without importing', async () => {
     const calls = [];
     const result = await crawlTopic(async offset => { calls.push(offset); return pages[offset]; }, null);
     assert(result.lastPostId === '16' && !result.posts.length, 'baseline');
@@ -296,6 +296,24 @@
     assert(calls.join() === '0,105,70,35', 'header prematurely stopped crawl');
     const empty = await crawlTopic(async offset => pages[offset], '16');
     assert(!empty.posts.length && empty.lastPostId === '16', 'repeat check');
+  });
+  await test('Repeated header never stops backward crawl; an old ordinary post does', async () => {
+    const marker = '145055810';
+    const header = {postId: '85632963'};
+    const mnpPages = {
+      0: {offset: 0, offsets: [0, 20, 40], previousOffset: null, topicTitle: 'MNP',
+        posts: [header, {postId: '84655351'}]},
+      20: {offset: 20, offsets: [0, 20, 40], previousOffset: 0,
+        posts: [header, {postId: marker}, {postId: '145060000'}]},
+      40: {offset: 40, offsets: [0, 20, 40], previousOffset: 20,
+        posts: [header, {postId: '145068300'}, {postId: '145068360'}]}
+    };
+    const calls = [];
+    const result = await crawlTopic(async offset => { calls.push(offset); return mnpPages[offset]; },
+      marker, false, '84655351');
+    assert(calls.join() === '0,40,20', 'repeated header stopped crawl or old ordinary post did not');
+    assert(result.posts.map(p => p.postId).join() === '145060000,145068300,145068360',
+      'header was saved or new ordinary posts were lost');
   });
   await test('Interrupted navigation rejects; retry includes every post', async () => {
     let failed = false;

@@ -32,7 +32,7 @@ async function crawlTopic(load, lastPostId, baseline = false, knownFirstPostId =
   while (true) {
     if (visited.has(page.offset)) throw new Error('Зацикливание пагинации.');
     visited.add(page.offset);
-    const ordinary = page.posts.filter(p => p.postId !== firstPostId);
+    const ordinary = page.posts.slice(1);
     for (const post of ordinary) {
       if (compareIds(post.postId, lastPostId) > 0 && compareIds(post.postId, latest) <= 0) posts.set(post.postId, post);
     }
